@@ -55,7 +55,7 @@
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
-                                            <outlet property="DispayView" destination="nsa-bj-w1e" id="oiO-dd-GeO"/>
+                                            <outlet property="displayImageView" destination="nsa-bj-w1e" id="RjW-UE-doN"/>
                                             <outlet property="titleLbl" destination="Hci-Se-kIn" id="TFh-d8-dXy"/>
                                         </connections>
                                     </tableViewCell>

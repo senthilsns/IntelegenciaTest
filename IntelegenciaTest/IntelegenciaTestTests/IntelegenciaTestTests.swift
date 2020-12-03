@@ -20,6 +20,19 @@ class IntelegenciaTestTests: XCTestCase {
         self.viewControllerUnderTest = storyboard.instantiateViewController(withIdentifier: "ViewController") as? ViewController
         self.viewControllerUnderTest.loadView()
         self.viewControllerUnderTest.viewDidLoad()
+        
+        
+        let file = "MockData.txt" //this is the file. we will write to and read from it
+              if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                  let fileURL = dir.appendingPathComponent(file)
+                  //reading
+                  do {
+                      let text2 = try String(contentsOf: fileURL, encoding: .utf8)
+                      print(text2)
+                  }
+                  catch {/* error handling here */}
+              }
+
     }
 
     override func tearDown() {
@@ -128,6 +141,41 @@ class IntelegenciaTestTests: XCTestCase {
             XCTAssertNil(responseError)
             
         }
+    
+    
+    
+//MARK: Asynchronous Test
+    
+    func testDownloadWebData() {
+        
+        // Create an expectation for a background download task.
+        let expectation = XCTestExpectation(description: "Download List Page")
+        
+        let url = URL(string: kImage_List_URL)!
+        
+        // Create a background task to download the web page.
+        let dataTask = URLSession.shared.dataTask(with: url) { (data, _, _) in
+            
+            // Make sure we downloaded some data.
+            XCTAssertNotNil(data, "No data was downloaded.")
+            
+            // Fulfill the expectation to indicate that the background task has finished successfully.
+            expectation.fulfill()
+            
+        }
+        
+        // Start the download task.
+        dataTask.resume()
+        
+        // Wait until the expectation is fulfilled, with a timeout of 10 seconds.
+        wait(for: [expectation], timeout: 10.0)
+        
+        
+     
+    }
+    
+    
+    
         
 
 }

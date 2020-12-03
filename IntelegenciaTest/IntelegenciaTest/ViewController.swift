@@ -34,6 +34,9 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         
         
         showImageList()
+        
+
+     
     }
     
     
@@ -78,7 +81,7 @@ func showImageList() {
                 let jsonResponse = try JSONSerialization.jsonObject(with:
                     dataResponse, options: []) as! Array<AnyObject>
                 
-                print(jsonResponse)
+               // print(jsonResponse)
                 for list in jsonResponse {
                 guard let autherList = list["author"] as? String else { return }
                 guard let fID = list["id"] as? Int else { return }
@@ -128,8 +131,8 @@ extension ViewController {
         cell.titleLbl?.text = listObj.author
         
         let urlStr = kImage_Specific_URL + "\(String(describing: listObj.id!))"
-        print(urlStr)
-        cell.DispayView.downloaded(from: urlStr)
+       // print(urlStr)
+        cell.displayImageView.downloaded(from: urlStr)
 
         
         return cell
@@ -141,7 +144,8 @@ extension ViewController {
 
 
 extension UIImageView {
-    func downloaded(from url: URL, contentMode mode: UIView.ContentMode = .scaleAspectFit) {  // for swift 4.2 syntax just use ===> mode: UIView.ContentMode
+    func downloaded(from url: URL, contentMode mode: UIView.ContentMode = .scaleAspectFit) {
+        
         contentMode = mode
         URLSession.shared.dataTask(with: url) { data, response, error in
             guard
@@ -155,7 +159,7 @@ extension UIImageView {
             }
             }.resume()
     }
-    func downloaded(from link: String, contentMode mode: UIView.ContentMode = .scaleAspectFit) {  // for swift 4.2 syntax just use ===> mode: UIView.ContentMode
+    func downloaded(from link: String, contentMode mode: UIView.ContentMode = .scaleAspectFit) {
         guard let url = URL(string: link) else { return }
         downloaded(from: url, contentMode: mode)
     }

@@ -22,6 +22,7 @@
 		35DC7CB02574D5C400E0901E /* SpecificImageViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DC7CAF2574D5C400E0901E /* SpecificImageViewTests.swift */; };
 		35DC7CB42574DBED00E0901E /* placeHolder.png in Resources */ = {isa = PBXBuildFile; fileRef = 35DC7CB32574DBED00E0901E /* placeHolder.png */; };
 		35DC7CB62574E7BC00E0901E /* ImagelistModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35DC7CB52574E7BC00E0901E /* ImagelistModel.swift */; };
+		35DC7CD825789AE400E0901E /* MockData.txt in Resources */ = {isa = PBXBuildFile; fileRef = 35DC7CD725789AE400E0901E /* MockData.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +63,8 @@
 		35DC7CAF2574D5C400E0901E /* SpecificImageViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpecificImageViewTests.swift; sourceTree = "<group>"; };
 		35DC7CB32574DBED00E0901E /* placeHolder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = placeHolder.png; sourceTree = "<group>"; };
 		35DC7CB52574E7BC00E0901E /* ImagelistModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagelistModel.swift; sourceTree = "<group>"; };
+		35DC7CD725789AE400E0901E /* MockData.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = MockData.txt; path = ../../../Desktop/MockData.txt; sourceTree = "<group>"; };
+		35DC7CD925789C0800E0901E /* MockData.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = MockData.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +123,7 @@
 				35DC7C722574A94800E0901E /* ViewController.swift */,
 				35DC7CA72574AC6700E0901E /* ImageCell.swift */,
 				35DC7C9E2574A9BA00E0901E /* DetailViewController.swift */,
+				35DC7CD925789C0800E0901E /* MockData.txt */,
 				35DC7C742574A94800E0901E /* Main.storyboard */,
 				35DC7C772574A94A00E0901E /* Assets.xcassets */,
 				35DC7C792574A94A00E0901E /* LaunchScreen.storyboard */,
@@ -134,6 +138,7 @@
 				35DC7C852574A94A00E0901E /* IntelegenciaTestTests.swift */,
 				35DC7CAF2574D5C400E0901E /* SpecificImageViewTests.swift */,
 				35DC7C872574A94A00E0901E /* Info.plist */,
+				35DC7CD725789AE400E0901E /* MockData.txt */,
 			);
 			path = IntelegenciaTestTests;
 			sourceTree = "<group>";
@@ -277,6 +282,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				35DC7CD825789AE400E0901E /* MockData.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

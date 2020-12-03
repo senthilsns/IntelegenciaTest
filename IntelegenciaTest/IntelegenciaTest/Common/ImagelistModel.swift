@@ -14,12 +14,10 @@ class DataModel {
     let author: String?
     let id : Int?
    
-   
  init(author:String,id:Int) {
         
         self.author = author
         self.id = id
-        
     }
     
 }

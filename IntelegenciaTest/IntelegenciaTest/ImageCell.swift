@@ -12,7 +12,7 @@ class ImageCell: UITableViewCell {
 
     @IBOutlet weak var titleLbl: UILabel!
     
-    @IBOutlet var DispayView: UIImageView!
+    @IBOutlet var displayImageView: UIImageView!
     
     override func awakeFromNib() {
         super.awakeFromNib()
