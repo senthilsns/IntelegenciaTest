@@ -17,8 +17,6 @@ public final class MockedData {
 
     public static let exampleJSON: URL = Bundle(for: MockedData.self).url(forResource: "example", withExtension: "json")!
     
-//    let documentsUrl:URL =  (FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first as URL?)!
-//       let destinationFileUrl = documentsUrl.appendingPathComponent("example.json")
 
 
 }
