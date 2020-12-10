@@ -8,6 +8,8 @@
 
 import XCTest
 @testable import IntelegenciaTest
+@testable import Mocker
+
 
 class SpecificImageViewTests: XCTestCase {
     var specificView: DetailViewController!
@@ -37,109 +39,43 @@ class SpecificImageViewTests: XCTestCase {
     }
     
     
-    //MARK: Image List
-       func testSpecificImagebyUrl(){
-                   var valid : Bool
-                   var invalid : Bool
-                   
-                   let string = kImage_Specific_URL+"0"
-                   if string.isValidURL {
-                      valid = true
-                      invalid = false
-                      
-                      // Success Case
-                      XCTAssertTrue(valid)
-                      XCTAssertEqual(valid, true)
-                      XCTAssertEqual(invalid, false)
-                   }else {
-                       valid = false
-                       invalid = true
-                      
-                      // Fail Case
-                      XCTAssertTrue(invalid)
-                      XCTAssertEqual(valid, false)
-                      XCTAssertEqual(invalid, true)
-                   }
-                          
+  // Mocked Response
+    
+    func testImageURLDataRequest() {
+        
+        let fullUrl:String = kImage_Specific_URL+"0"
+           let expectation = self.expectation(description: "Data request should succeed")
+           let originalURL = URL(string: fullUrl)!
+           
+           let mock = Mock(url: originalURL, dataType: .imagePNG, statusCode: 200, data: [
+               .get: MockedData.botAvatarImageFileUrl.data
+           ])
+           
+           mock.register()
+           URLSession.shared.dataTask(with: originalURL) { (data, _, error) in
+               XCTAssert(error == nil)
+               let image: UIImage = UIImage(data: data!)!
+               let sampleImage: UIImage = UIImage(contentsOfFile: MockedData.botAvatarImageFileUrl.path)!
+               
+               XCTAssert(image.size == sampleImage.size, "Image should be returned mocked")
+               expectation.fulfill()
+           }.resume()
+           
+           waitForExpectations(timeout: 10.0, handler: nil)
+       }
+    
+    
+    
+    // Remove all registered mocks correctly.
+      func testRemoveAll() {
+          let mock = Mock(dataType: .json, statusCode: 200, data: [.get: Data()])
+          mock.register()
+          Mocker.removeAll()
+          XCTAssertTrue(Mocker.shared.mocks.isEmpty)
+      }
 
-               }
+   
     
-    func testParticularImageDownload() {
-                
-             let registerURL : String = kImage_Specific_URL+"0"
-             let testAppURL = NSURL(string: registerURL)
-                
-                // Success Case
-             XCTAssertTrue(UIApplication.shared.canOpenURL(testAppURL! as URL))
-
-                // Invalid URL
-              guard URL(string: registerURL) != nil else {
-                    XCTFail("Invalid URL '\(registerURL)'")
-                    return
-                }
-                // Status Code with timeout
-                var httpResponse: HTTPURLResponse?
-                var responseError: Error?
-                
-               URLSession.shared.dataTask(with: URL.init(string: (testAppURL?.absoluteString)!)!){(data,response,err) in
-                       
-                       if err != nil {
-                           XCTAssertNotNil(err)
-                          return
-                       }
-                       
-                       let statusCode = (response as! HTTPURLResponse).statusCode
-                       if statusCode == 200 {
-                           httpResponse = response as? HTTPURLResponse
-                           
-                           XCTAssertEqual(httpResponse!.statusCode, 200)
-
-                       } else {
-                           responseError = err
-                           XCTFail("Status code: \(statusCode)")
-                       }
-                       
-                   }.resume()
-             
-                
-                // Success
-                XCTAssertNil(responseError)
-             
-    }
-    
-    
-    
-    
-    
-    //MARK: Asynchronous Test
-    
-    func testDownloadSpecificImage() {
-        
-        // Create an expectation for a background download task.
-        let expectation = XCTestExpectation(description: "Download Specific Image Page")
-        
-        let url = URL(string: kImage_Specific_URL+"0")!
-        
-        // Create a background task to download the web page.
-        let dataTask = URLSession.shared.dataTask(with: url) { (data, _, _) in
-            
-            // Make sure we downloaded some data.
-            XCTAssertNotNil(data, "No data was downloaded.")
-            
-            // Fulfill the expectation to indicate that the background task has finished successfully.
-            expectation.fulfill()
-            
-        }
-        
-        // Start the download task.
-        dataTask.resume()
-        
-        // Wait until the expectation is fulfilled, with a timeout of 10 seconds.
-        wait(for: [expectation], timeout: 10.0)
-        
-        
-     
-    }
-    
+  
 
 }

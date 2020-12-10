@@ -8,6 +8,8 @@
 
 import XCTest
 @testable import IntelegenciaTest
+@testable import Mocker
+
 
 class IntelegenciaTestTests: XCTestCase {
     
@@ -21,18 +23,6 @@ class IntelegenciaTestTests: XCTestCase {
         self.viewControllerUnderTest.loadView()
         self.viewControllerUnderTest.viewDidLoad()
         
-        
-        let file = "MockData.txt" //this is the file. we will write to and read from it
-              if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                  let fileURL = dir.appendingPathComponent(file)
-                  //reading
-                  do {
-                      let text2 = try String(contentsOf: fileURL, encoding: .utf8)
-                      print(text2)
-                  }
-                  catch {/* error handling here */}
-              }
-
     }
 
     override func tearDown() {
@@ -72,124 +62,99 @@ class IntelegenciaTestTests: XCTestCase {
     
     
     
-    //MARK: Image List
-    func testResetPasswordonlyUrl(){
-                var valid : Bool
-                var invalid : Bool
-                
-                let string = kImage_List_URL
-                if string.isValidURL {
-                   valid = true
-                   invalid = false
-                   
-                   // Success Case
-                   XCTAssertTrue(valid)
-                   XCTAssertEqual(valid, true)
-                   XCTAssertEqual(invalid, false)
-                }else {
-                    valid = false
-                    invalid = true
-                   
-                   // Fail Case
-                   XCTAssertTrue(invalid)
-                   XCTAssertEqual(valid, false)
-                   XCTAssertEqual(invalid, true)
-                }
-                       
+    // Mock Test
+    func testImageList(){
+        
+        let originalURL = URL(string:kImage_List_URL)!
 
-            }
-    
-    func testImageList() {
-            
-            let registerURL : String = kImage_List_URL
-            let testAppURL = NSURL(string: registerURL)
-            
-          
-            // Success Case
-            XCTAssertTrue(UIApplication.shared.canOpenURL(testAppURL! as URL))
+        let mock = Mock(url: originalURL, dataType: .json, statusCode: 200, data: [
+            .get : MockedData.exampleJSON.data // Data containing the JSON response
+        ])
+        mock.register()
 
-            // Invalid URL
-          guard URL(string: registerURL) != nil else {
-                XCTFail("Invalid URL '\(registerURL)'")
+        URLSession.shared.dataTask(with: originalURL) { (data, response, error) in
+            guard let data = data, let _ = (try? JSONSerialization.jsonObject(with: data, options: [])) as? [String: Any] else {
                 return
             }
-            // Status Code with timeout
-            var httpResponse: HTTPURLResponse?
-            var responseError: Error?
-            
-            
-            URLSession.shared.dataTask(with: URL.init(string: (testAppURL?.absoluteString)!)!){(data,response,err) in
-                
-                if err != nil {
-                  XCTAssertNotNil(err)
-                   return
-                }
-                
-                let statusCode = (response as! HTTPURLResponse).statusCode
-                if statusCode == 200 {
-                    httpResponse = response as? HTTPURLResponse
-                    XCTAssertEqual(httpResponse?.statusCode, 200)
 
-                } else {
-                    responseError = err
-                    XCTFail("Status code: \(statusCode)")
-                }
-                
-            }.resume()
-                      
-            // Success
-            XCTAssertNil(responseError)
-            
-        }
-    
-    
-    
-//MARK: Asynchronous Test
-    
-    func testDownloadWebData() {
-        
-        // Create an expectation for a background download task.
-        let expectation = XCTestExpectation(description: "Download List Page")
-        
-        let url = URL(string: kImage_List_URL)!
-        
-        // Create a background task to download the web page.
-        let dataTask = URLSession.shared.dataTask(with: url) { (data, _, _) in
-            
-            // Make sure we downloaded some data.
-            XCTAssertNotNil(data, "No data was downloaded.")
-            
-            // Fulfill the expectation to indicate that the background task has finished successfully.
-            expectation.fulfill()
-            
-        }
-        
-        // Start the download task.
-        dataTask.resume()
-        
-        // Wait until the expectation is fulfilled, with a timeout of 10 seconds.
-        wait(for: [expectation], timeout: 10.0)
-        
-        
-     
+            // Check with original and mock Response
+            XCTAssertEqual(data,MockedData.exampleJSON.data)
+
+        }.resume()
+
     }
     
     
+    // Cancellation of requests with a delayed mock.
+      func testDelayedMockCancelation() {
+          let expectation = self.expectation(description: "Data request should be cancelled")
+          var mock = Mock(dataType: .json, statusCode: 200, data: [.get: Data()])
+          mock.delay = DispatchTimeInterval.seconds(5)
+          mock.register()
+
+          let task = URLSession.shared.dataTask(with: mock.request) { (_, _, error) in
+              XCTAssert(error?._code == NSURLErrorCancelled)
+              expectation.fulfill()
+          }
+
+          task.resume()
+
+          DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+              task.cancel()
+          })
+          waitForExpectations(timeout: 10.0, handler: nil)
+      }
+
+
+    //Two mocks for the same URL if the HTTP method is different.
+     func testDifferentHTTPMethodSameURL() {
+         let url = URL(string:kImage_List_URL)!
+         Mock(url: url, dataType: .json, statusCode: 200, data: [.get: Data()]).register()
+         Mock(url: url, dataType: .json, statusCode: 200, data: [.put: Data()]).register()
+         var request = URLRequest(url: url)
+         request.httpMethod = Mock.HTTPMethod.get.rawValue
+         XCTAssertNotNil(Mocker.mock(for: request))
+         request.httpMethod = Mock.HTTPMethod.put.rawValue
+         XCTAssertNotNil(Mocker.mock(for: request))
+     }
+
+    // Requested from the mock when we pass in an Error.
+       func testMockReturningError() {
+           let expectation = self.expectation(description: "Data request should succeed")
+           let originalURL = URL(string: kImage_List_URL)!
+
+           enum TestExampleError: Error {
+               case example
+           }
+
+           Mock(url: originalURL, dataType: .json, statusCode: 500, data: [.get: Data()], requestError: TestExampleError.example).register()
+
+           URLSession.shared.dataTask(with: originalURL) { (data, urlresponse, err) in
+
+               XCTAssertNil(data)
+               XCTAssertNil(urlresponse)
+               XCTAssertNotNil(err)
+               if let err = err {
+                   XCTAssertEqual("example", String(describing: err))
+               }
+
+               expectation.fulfill()
+           }.resume()
+
+           waitForExpectations(timeout: 10.0, handler: nil)
+       }
+
     
-        
+    // Remove all registered mocks correctly.
+        func testRemoveAll() {
+            let mock = Mock(dataType: .json, statusCode: 200, data: [.get: Data()])
+            mock.register()
+            Mocker.removeAll()
+            XCTAssertTrue(Mocker.shared.mocks.isEmpty)
+        }
+
+
 
 }
 
 
-//MARK: URL Validation
-extension String {
-    var isValidURL: Bool {
-        let detector = try! NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
-        if let match = detector.firstMatch(in: self, options: [], range: NSRange(location: 0, length: self.utf16.count)) {
-            // it is a link, if the match covers the whole string
-            return match.range.length == self.utf16.count
-        } else {
-            return false
-        }
-    }
-}
